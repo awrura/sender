@@ -11,3 +11,11 @@ dev = [
     "pre-commit>=4.0.1",
     "ruff>=0.8.4",
 ]
+
+[tool.pyright]
+exclude = [ ".venv" ]
+venvPath = "."
+venv = ".venv"
+executionEnvironments = [
+  { root = "src" },
+]
