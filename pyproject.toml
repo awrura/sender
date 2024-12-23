@@ -4,7 +4,9 @@ version = "0.1.0"
 description = "Сервис сериализации и отправки данных"
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "aiomqtt>=2.3.0",
+]
 
 [dependency-groups]
 dev = [
