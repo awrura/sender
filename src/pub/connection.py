@@ -1,18 +1,18 @@
 from typing import Protocol
 
-import aiomqtt
-from stream import MessageStream
+from stream import EndlessMessageStream
 
 
-class Connection(Protocol):
-    async def create(self, stream: MessageStream):
-        pass
+class StreamConnection(Protocol):
+    """
+    Соединение прослушивающее поток данных
+    При наличии сообщения в потоке извлекает его и отправляет получателю
+    """
 
+    async def listen(self, stream: EndlessMessageStream):
+        """
+        Начать прослушивать поток данных.
+        При извлечении сообщения отправляет его получателю
+        """
 
-class ConnectionMqtt(Connection):
-    async def create(self, stream: MessageStream):
-        async with aiomqtt.Client(
-            hostname='localhost', port=1883, username='user1', password='main'
-        ) as client:
-            async for m in stream:
-                await client.publish('test', payload=f'{m}')
+        raise NotImplementedError()
