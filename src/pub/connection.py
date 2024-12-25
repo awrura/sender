@@ -1,6 +1,6 @@
 from typing import Protocol
 
-from stream import EndlessMessageStream
+from pub.stream import EndlessMessageStream
 
 
 class StreamConnection(Protocol):

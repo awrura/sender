@@ -1,8 +1,8 @@
 import asyncio
 from collections.abc import Iterable
 
-from connection import StreamConnection
-from stream import EndlessMessageStream
+from pub.connection import StreamConnection
+from pub.stream import EndlessMessageStream
 
 
 class StreamConnectionPublisher:
