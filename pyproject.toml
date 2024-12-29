@@ -19,6 +19,9 @@ dev = [
 exclude = [ ".venv" ]
 venvPath = "."
 venv = ".venv"
+include = [
+  "src/cnpool",
+]
 executionEnvironments = [
   { root = "src" },
 ]
