@@ -1,5 +1,7 @@
 import asyncio
+import logging
 from asyncio import Queue
+from logging import Logger
 
 from cnpool.connection import ConnectionConfg
 from cnpool.connection import MqttConnection
@@ -26,6 +28,7 @@ class MqttConnectionPool:
         login: str,
         password: str,
         target_topic: str,
+        logger: Logger | None = None,
         workers: int = 4,
         max_queue_size=None,
     ):
@@ -42,7 +45,7 @@ class MqttConnectionPool:
 
         :param target_topic: Название MQTT топика в который будут отправляться сообщения
         :param workers: Количество соединений с брокером
-        :param max_queue_size: Максимальный размер ожидающих сообщений
+        :param max_queue_size: Максимальный размер ожидающих сообщений. По умолчанию = workers * 1024
         """
 
         max_queue_size = max_queue_size or workers * 1024
@@ -50,17 +53,23 @@ class MqttConnectionPool:
             hostname, port, login, password, target_topic
         )
 
-        self._queue = Queue(maxsize=workers * 1024)
+        self._queue = Queue(maxsize=max_queue_size)
+        self._logger = logger or logging.getLogger(__name__)
         self._active_connections = []
         self._connections = [
-            MqttConnection(conf=connection_config) for _ in range(workers)
+            MqttConnection(conf=connection_config, logger=self._logger)
+            for _ in range(workers)
         ]
 
     async def __aenter__(self):
         self._active_connections = [
             asyncio.create_task(conn.listen(self._queue)) for conn in self._connections
         ]
+        self._logger.debug(
+            f'Enter in pool manager success. Num connections: {len(self._connections)}'
+        )
         return Sender(queue=self._queue)  # pyright: ignore[reportArgumentType]
 
     async def __aexit__(self, exc_type, exc, tb):
         map(lambda task: task.cancel(), self._active_connections)
+        self._logger.debug('Exit from pool manager success')

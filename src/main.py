@@ -1,7 +1,15 @@
 import asyncio
+import logging.config
 
+import yaml
 from cnpool.pool import MqttConnectionPool
 from pydantic_settings import BaseSettings
+
+with open('logging.yaml', 'r') as f:
+    config = yaml.safe_load(f)
+    logging.config.dictConfig(config)
+
+logger = logging.getLogger(__name__)
 
 
 class MqttConfig(BaseSettings):
@@ -24,13 +32,13 @@ async def main():
         login=conf.MQTT_LOGIN,
         password=conf.MQTT_PASS,
         target_topic=conf.MQTT_TOPIC,
-    ) as connection:
+    ) as pool:
         while True:
             await asyncio.sleep(5)
-            await connection.send(42)
+            await pool.send(42)
             print('HELLO!!')
 
 
 if __name__ == '__main__':
-    print('Hello world')
+    logger.info('Sender starts wake up')
     asyncio.run(main())
