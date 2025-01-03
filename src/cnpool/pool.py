@@ -9,8 +9,9 @@ from cnpool.transport import PutOnlyQueue
 
 
 class Sender:
-    def __init__(self, queue: PutOnlyQueue):
+    def __init__(self, queue: PutOnlyQueue, logger: Logger | None = None):
         self._queue = queue
+        self._logger = logger or logging.getLogger(__name__)
 
     async def send(self, payload):
         """
@@ -18,6 +19,7 @@ class Sender:
         """
 
         await self._queue.put(payload)
+        self._logger.debug('Message put in queue')
 
 
 class MqttConnectionPool:
