@@ -2,7 +2,7 @@ import asyncio
 import logging.config
 
 import yaml
-from bridge.redis import RedisMessageQueue
+from bridge.redis_queue import RedisMessageQueue
 from cnpool.pool import MqttConnectionPool
 from pydantic_settings import BaseSettings
 
