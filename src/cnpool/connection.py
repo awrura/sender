@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import uuid
 from dataclasses import dataclass
@@ -6,7 +5,7 @@ from logging import Logger
 
 import aiomqtt
 from cnpool.transport import ReadOnlyQueue
-
+from utils.reconnect import arecnct
 
 logger = logging.getLogger(__name__)
 
@@ -59,15 +58,9 @@ class MqttConnection:
             password=self._conf.PASS,
         )
 
-        while True:
-            try:
-                await self._forward_queue_messages(client, queue)
-            except aiomqtt.MqttError:
-                self._logger.error(
-                    f'Connection({self._uuid}) faild. Retry after {self._retry_sec} sec'
-                )
-                await asyncio.sleep(self._retry_sec)
+        await self._forward_queue_messages(client, queue)
 
+    @arecnct(msg='Connection to MQTT Broker failed', on_error=(aiomqtt.MqttError,))
     async def _forward_queue_messages(
         self, client: aiomqtt.Client, queue: ReadOnlyQueue
     ):
