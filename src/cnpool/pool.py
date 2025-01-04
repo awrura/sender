@@ -5,6 +5,7 @@ from logging import Logger
 
 from cnpool.connection import ConnectionConfg
 from cnpool.connection import MqttConnection
+from cnpool.transport import MessageQueue
 from cnpool.transport import PutOnlyQueue
 
 
@@ -55,7 +56,7 @@ class MqttConnectionPool:
             hostname, port, login, password, target_topic
         )
 
-        self._queue = Queue(maxsize=max_queue_size)
+        self._queue = MessageQueue(queue=Queue(maxsize=max_queue_size))
         self._logger = logger or logging.getLogger(__name__)
         self._active_connections = []
         self._connections = [

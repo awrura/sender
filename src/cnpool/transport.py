@@ -1,3 +1,4 @@
+from asyncio import Queue
 from typing import Any
 from typing import Protocol
 
@@ -25,3 +26,25 @@ class ReadOnlyQueue(Protocol):
 
     async def get(self) -> Any:
         raise NotImplementedError()
+
+
+class MessageQueue(PutOnlyQueue, ReadOnlyQueue):
+    """
+    Очередь сообщений
+
+    Реализация очереди сообщений, построенная на asyncio.Queue
+    Проксирует вызовы в api получения и вставки элемента в очередь
+    При получении элемента из очереди автоматически
+    уменьшает счетчик незавершенных задач в asyncio.Queue на 1
+    """
+
+    def __init__(self, queue: Queue):
+        self._queue = queue
+
+    async def put(self, msg: Any):
+        await self._queue.put(msg)
+
+    async def get(self) -> Any:
+        msg = await self._queue.get()
+        self._queue.task_done()
+        return msg
