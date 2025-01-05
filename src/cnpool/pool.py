@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class Sender:
-    def __init__(self, queue: PutOnlyQueue, logger: Logger | None = None):
+    def __init__(self, queue: PutOnlyQueue):
         self._queue = queue
 
     async def send(self, payload):
