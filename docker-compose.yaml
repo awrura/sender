@@ -5,4 +5,6 @@ services:
     build:
       context: ./
       dockerfile: docker/Dockerfile
-    entrypoint: python main.py
+    entrypoint: uv run main.py
+    env_file:
+      - ./.env
