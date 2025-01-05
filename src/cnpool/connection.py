@@ -1,4 +1,3 @@
-import asyncio
 import logging
 import uuid
 from dataclasses import dataclass
@@ -6,9 +5,7 @@ from logging import Logger
 
 import aiomqtt
 from cnpool.transport import ReadOnlyQueue
-
-
-logger = logging.getLogger(__name__)
+from utils.retry import aretry
 
 
 @dataclass
@@ -51,7 +48,6 @@ class MqttConnection:
         При получении сообщения сериализует его и отправляет в брокер
         """
 
-        self._logger.debug(f'Connection({self._uuid}) begins')
         client = aiomqtt.Client(
             hostname=self._conf.HOST,
             port=self._conf.PORT,
@@ -59,15 +55,9 @@ class MqttConnection:
             password=self._conf.PASS,
         )
 
-        while True:
-            try:
-                await self._forward_queue_messages(client, queue)
-            except aiomqtt.MqttError:
-                self._logger.error(
-                    f'Connection({self._uuid}) faild. Retry after {self._retry_sec} sec'
-                )
-                await asyncio.sleep(self._retry_sec)
+        await self._forward_queue_messages(client, queue)
 
+    @aretry(msg='Connection to MQTT Broker failed', on_error=(aiomqtt.MqttError,))
     async def _forward_queue_messages(
         self, client: aiomqtt.Client, queue: ReadOnlyQueue
     ):
@@ -78,6 +68,7 @@ class MqttConnection:
         :param queue: Очередь из которой забирать сообщения
         """
 
+        self._logger.debug(f'Connection({self._uuid}) begins')
         async with client:
             self._logger.info(f'Connection({self._uuid}) success')
             while True:
