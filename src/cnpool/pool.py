@@ -8,11 +8,12 @@ from cnpool.connection import MqttConnection
 from cnpool.transport import MessageQueue
 from cnpool.transport import PutOnlyQueue
 
+logger = logging.getLogger(__name__)
+
 
 class Sender:
     def __init__(self, queue: PutOnlyQueue, logger: Logger | None = None):
         self._queue = queue
-        self._logger = logger or logging.getLogger(__name__)
 
     async def send(self, payload):
         """
@@ -20,7 +21,7 @@ class Sender:
         """
 
         await self._queue.put(payload)
-        self._logger.debug('Message put in queue')
+        logger.debug('Message put in queue')
 
 
 class MqttConnectionPool:
@@ -57,10 +58,10 @@ class MqttConnectionPool:
         )
 
         self._queue = MessageQueue(queue=Queue(maxsize=max_queue_size))
-        self._logger = logger or logging.getLogger(__name__)
+        logger = logger or logging.getLogger(__name__)
         self._active_connections = []
         self._connections = [
-            MqttConnection(conf=connection_config, logger=self._logger)
+            MqttConnection(conf=connection_config, logger=logger)
             for _ in range(workers)
         ]
 
@@ -68,11 +69,11 @@ class MqttConnectionPool:
         self._active_connections = [
             asyncio.create_task(conn.listen(self._queue)) for conn in self._connections
         ]
-        self._logger.debug(
+        logger.debug(
             f'Enter in pool manager success. Num connections: {len(self._connections)}'
         )
         return Sender(queue=self._queue)  # pyright: ignore[reportArgumentType]
 
     async def __aexit__(self, exc_type, exc, tb):
         map(lambda task: task.cancel(), self._active_connections)
-        self._logger.debug('Exit from pool manager success')
+        logger.debug('Exit from pool manager success')

@@ -2,15 +2,16 @@ import asyncio
 import logging.config
 
 import yaml
-from bridge.redis_queue import RedisMessageQueue
-from cnpool.pool import MqttConnectionPool
 from pydantic_settings import BaseSettings
 
 with open('logging.yaml', 'r') as f:
-    config = yaml.safe_load(f)
-    logging.config.dictConfig(config)
+    config = yaml.load(f, Loader=yaml.FullLoader)
 
+logging.config.dictConfig(config)
 logger = logging.getLogger(__name__)
+
+from bridge.redis_queue import RedisMessageQueue  # noqa: E402
+from cnpool.pool import MqttConnectionPool  # noqa: E402
 
 
 class Config(BaseSettings):
@@ -46,7 +47,6 @@ async def main():
         while True:
             msg = await bridge.pop()
             await pool.send(msg)
-            print('Receive', msg)
 
 
 if __name__ == '__main__':
