@@ -5,9 +5,7 @@ from logging import Logger
 
 import aiomqtt
 from cnpool.transport import ReadOnlyQueue
-from utils.reconnect import arecnct
-
-logger = logging.getLogger(__name__)
+from utils.retry import aretry
 
 
 @dataclass
@@ -50,7 +48,6 @@ class MqttConnection:
         При получении сообщения сериализует его и отправляет в брокер
         """
 
-        self._logger.debug(f'Connection({self._uuid}) begins')
         client = aiomqtt.Client(
             hostname=self._conf.HOST,
             port=self._conf.PORT,
@@ -60,7 +57,7 @@ class MqttConnection:
 
         await self._forward_queue_messages(client, queue)
 
-    @arecnct(msg='Connection to MQTT Broker failed', on_error=(aiomqtt.MqttError,))
+    @aretry(msg='Connection to MQTT Broker failed', on_error=(aiomqtt.MqttError,))
     async def _forward_queue_messages(
         self, client: aiomqtt.Client, queue: ReadOnlyQueue
     ):
@@ -71,6 +68,7 @@ class MqttConnection:
         :param queue: Очередь из которой забирать сообщения
         """
 
+        self._logger.debug(f'Connection({self._uuid}) begins')
         async with client:
             self._logger.info(f'Connection({self._uuid}) success')
             while True:

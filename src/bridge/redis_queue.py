@@ -4,7 +4,7 @@ from logging import Logger
 from redis.asyncio import ConnectionPool as AsyncConnectionPool
 from redis.asyncio import Redis as AsyncRedis
 from redis.exceptions import ConnectionError as RedisConnectionError
-from utils.reconnect import arecnct
+from utils.retry import aretry
 
 
 class RedisMessageQueue:
@@ -13,7 +13,7 @@ class RedisMessageQueue:
         self._queue = queue
         self._logger = logger or logging.getLogger(__name__)
 
-    @arecnct(msg='Unable connect to Redis', on_error=(RedisConnectionError,))
+    @aretry(msg='Unable connect to Redis', on_error=(RedisConnectionError,))
     async def pop(self):
         r = AsyncRedis(connection_pool=self._pool)
         _, msg = await r.blpop(self._queue)  # pyright: ignore[reportArgumentType, reportGeneralTypeIssues]
