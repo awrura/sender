@@ -23,7 +23,7 @@ class RedisMessageQueue:
 
         r = AsyncRedis(connection_pool=self._pool)
         _, msg = await r.blpop(self._queue)  # pyright: ignore[reportArgumentType, reportGeneralTypeIssues]
-        return msg
+        return bytes(msg['data'])
 
     async def __aenter__(self):
         logger.debug('Redis connection pool ready')
