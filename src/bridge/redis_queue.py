@@ -14,7 +14,7 @@ class RedisMessageQueue:
         self._queue = queue
 
     @aretry(msg='Unable connect to Redis', on_error=(RedisConnectionError,))
-    async def pop(self):
+    async def pop(self) -> bytes:
         """
         Извлечь сообщение из очереди Redis
 
