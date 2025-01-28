@@ -1,6 +1,11 @@
 from asyncio import Queue
-from typing import Any
 from typing import Protocol
+from typing import TypedDict
+
+
+class Message(TypedDict):
+    topic: str
+    payload: bytes
 
 
 class PutOnlyQueue(Protocol):
@@ -11,7 +16,7 @@ class PutOnlyQueue(Protocol):
     Если очередь переполнена, то будет ожидать освобождения места
     """
 
-    async def put(self, msg: Any):
+    async def put(self, msg: Message):
         raise NotImplementedError()
 
 
@@ -24,7 +29,7 @@ class ReadOnlyQueue(Protocol):
     Если сообщений в очереди нет, то клиент ожидает его
     """
 
-    async def get(self) -> Any:
+    async def get(self) -> Message:
         raise NotImplementedError()
 
 
@@ -41,10 +46,10 @@ class MessageQueue(PutOnlyQueue, ReadOnlyQueue):
     def __init__(self, queue: Queue):
         self._queue = queue
 
-    async def put(self, msg: Any):
+    async def put(self, msg: Message):
         await self._queue.put(msg)
 
-    async def get(self) -> Any:
+    async def get(self) -> Message:
         msg = await self._queue.get()
         self._queue.task_done()
         return msg

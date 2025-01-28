@@ -5,6 +5,7 @@ from logging import Logger
 
 from cnpool.connection import ConnectionConfg
 from cnpool.connection import MqttConnection
+from cnpool.transport import Message
 from cnpool.transport import MessageQueue
 from cnpool.transport import PutOnlyQueue
 
@@ -15,12 +16,12 @@ class Sender:
     def __init__(self, queue: PutOnlyQueue):
         self._queue = queue
 
-    async def send(self, payload):
+    async def send(self, msg: Message):
         """
         Положить сообщение для отправки в очередь ожидаюзщих отправки сообщений
         """
 
-        await self._queue.put(payload)
+        await self._queue.put(msg)
         logger.debug('Message put in queue')
 
 
@@ -31,7 +32,6 @@ class MqttConnectionPool:
         port: int,
         login: str,
         password: str,
-        target_topic: str,
         logger: Logger | None = None,
         workers: int = 4,
         max_queue_size=None,
@@ -53,9 +53,7 @@ class MqttConnectionPool:
         """
 
         max_queue_size = max_queue_size or workers * 1024
-        connection_config = ConnectionConfg(
-            hostname, port, login, password, target_topic
-        )
+        connection_config = ConnectionConfg(hostname, port, login, password)
 
         self._queue = MessageQueue(queue=Queue(maxsize=max_queue_size))
         logger = logger or logging.getLogger(__name__)
