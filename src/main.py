@@ -19,7 +19,6 @@ class Config(BaseSettings):
     MQTT_PORT: int
     MQTT_LOGIN: str
     MQTT_PASS: str
-    MQTT_TOPIC: str
 
     REDIS_HOST: str
     REDIS_PORT: int
@@ -37,7 +36,6 @@ async def main():
         port=conf.MQTT_PORT,
         login=conf.MQTT_LOGIN,
         password=conf.MQTT_PASS,
-        target_topic=conf.MQTT_TOPIC,
     )
     incoming_queue = RedisMessageQueue(
         host=conf.REDIS_HOST, port=conf.REDIS_PORT, queue=conf.REDIS_QUEUE

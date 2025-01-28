@@ -14,7 +14,6 @@ class ConnectionConfg:
     PORT: int
     LOGIN: str
     PASS: str
-    TOPIC: str
 
 
 class MqttConnection:
@@ -72,8 +71,8 @@ class MqttConnection:
         async with client:
             self._logger.info(f'Connection({self._uuid}) success')
             while True:
-                payload = await queue.get()
-                await client.publish(topic=self._conf.TOPIC, payload=payload)
+                msg = await queue.get()
+                await client.publish(topic=msg['topic'], payload=msg['payload'])
                 self._logger.info(
-                    f"Connection({self._uuid}) sent message into '{self._conf.TOPIC}' topic"
+                    f"Connection({self._uuid}) sent message into '{msg['topic']}' topic"
                 )
