@@ -30,7 +30,7 @@ def aretry(
             current_delay = start_delay_sec
             while True:
                 try:
-                    await func(*args, **kwargs)
+                    return await func(*args, **kwargs)
                 except on_error:
                     logger.error(f'{msg}. Retry after {current_delay} sec')
                     await asyncio.sleep(current_delay)
