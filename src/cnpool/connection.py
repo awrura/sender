@@ -72,7 +72,12 @@ class MqttConnection:
             self._logger.info(f'Connection({self._uuid}) success')
             while True:
                 msg = await queue.get()
-                await client.publish(topic=msg['topic'], payload=msg['payload'])
+                self._logger.info(
+                    f'Connection({self._uuid}) receive message from queue'
+                )
+                await client.publish(
+                    topic=msg['topic'], payload=msg['payload'], timeout=10
+                )
                 self._logger.info(
                     f"Connection({self._uuid}) sent message into '{msg['topic']}' topic"
                 )

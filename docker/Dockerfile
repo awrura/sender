@@ -1,4 +1,4 @@
-FROM python:3.12-slim-bookworm
+FROM python:3.10-slim-bookworm
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 RUN apt-get update && apt-get install netcat-traditional -y && apt-get autoremove -y && apt-get clean
