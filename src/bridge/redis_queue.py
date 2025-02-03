@@ -2,8 +2,10 @@ import json
 import logging
 from typing import TypedDict
 
-from redis.asyncio import ConnectionPool as AsyncConnectionPool
-from redis.asyncio import Redis as AsyncRedis
+from aioredis import ConnectionPool as AsyncConnectionPool
+from aioredis import Redis as AsyncRedis
+from aioredis.exceptions import RedisError
+from utils.retry import aretry
 
 logger = logging.getLogger(__name__)
 
@@ -18,7 +20,7 @@ class RedisMessageQueue:
         self._pool = AsyncConnectionPool(host=host, port=port)
         self._queue = queue
 
-    # @aretry(msg='Unable connect to Redis', on_error=(RedisConnectionError,))
+    @aretry(msg='Unable connect to Redis', on_error=(RedisError,))
     async def pop(self) -> InputMessage:
         """
         Извлечь сообщение из очереди Redis
@@ -32,12 +34,12 @@ class RedisMessageQueue:
         msg = json.loads(msg)
 
         logger.info(f'Parsed message: {msg}')
-        return InputMessage(topic=msg['topic'], payload=msg['data'])
+        return InputMessage(topic=msg['topic'], payload=bytes(msg['data']))
 
     async def __aenter__(self):
         logger.debug('Redis connection pool ready')
         return self
 
     async def __aexit__(self, exc_type, exc, tb):
-        await self._pool.aclose()
+        await self._pool.disconnect()
         logger.debug('Redis connection pool closed')
