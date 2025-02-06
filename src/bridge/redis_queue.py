@@ -29,11 +29,10 @@ class RedisMessageQueue:
         """
 
         r = AsyncRedis(connection_pool=self._pool)
-        _, msg = await r.blpop(self._queue)  # pyright: ignore[reportArgumentType, reportGeneralTypeIssues]
-        logger.info(f'Received msg from redis: {msg}')
+        _, msg = await r.blpop(self._queue)
+        logger.info('Received msg from redis')
         msg = json.loads(msg)
 
-        logger.info(f'Parsed message: {msg}')
         return InputMessage(topic=msg['topic'], payload=bytes(msg['data']))
 
     async def __aenter__(self):
