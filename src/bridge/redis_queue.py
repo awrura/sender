@@ -17,8 +17,6 @@ class InputMessage(TypedDict):
 
 
 class RedisMessageQueue:
-    DRAW_COMMAND = 1
-
     def __init__(self, host: str, port: int, queue: str):
         self._pool = AsyncConnectionPool(host=host, port=port)
         self._queue = queue
