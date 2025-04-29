@@ -1,0 +1,94 @@
+asyncapi: 3.0.0
+info:
+  title: Matrix Sender
+  version: 1.0.0
+  description: Сервис отправки сообщений на светодиодную матрицу
+
+channels:
+  matrixCommand:
+    description: >
+      Очередь отправки сообщений на светодиодную матрицу.
+    address: queue
+    messages:
+        MatrixDrawCommand:
+          $ref: '#/components/messages/MatrixDrawCommand'
+        MatrixSetBrightnessCommand:
+          $ref: '#/components/messages/MatrixBrightnessCommand'
+
+operations:
+  matrixDraw:
+    action: send
+    channel:
+      $ref: '#/channels/matrixCommand'
+    messages:
+      - $ref: '#/channels/matrixCommand/messages/MatrixDrawCommand'
+
+  matrixSetBrightness:
+    action: send
+    channel:
+      $ref: '#/channels/matrixCommand'
+    messages:
+      - $ref: '#/channels/matrixCommand/messages/MatrixSetBrightnessCommand'
+
+
+components:
+  messages:
+    MatrixDrawCommand:
+      name: MatrixDrawCommand
+      summary: Команда рисования на матрице
+      contentType: application/json
+      payload:
+        type: object
+        required: [command, topic, data]
+        properties:
+          topic:
+            type: string
+            description: Имя канала/топика (например, 'matrix/hello')
+          data:
+            type: array
+            description: >
+              Массив длиной до 768 элементов (256 троек), каждая тройка [R, G, B].
+              Например, [255, 0, 0, 0, 255, 0, ...]
+            minItems: 3
+            items:
+              type: integer
+              minimum: 0
+              maximum: 255
+          command:
+            type: integer
+            enum: [1]
+            description: Код команды (1 — рисование на матрице)
+      examples:
+        - payload:
+            topic: 'matrix/hello'
+            command: 1
+            data: [255, 0, 0, 0, 255, 0]
+
+    MatrixBrightnessCommand:
+      name: MatrixBrightnessCommand
+      summary: Команда установки яркости матрицы
+      contentType: application/json
+      payload:
+        type: object
+        required: [command, topic, data]
+        properties:
+          topic:
+            type: string
+          data:
+            type: array
+            minItems: 1
+            maxItems: 1
+            items:
+              type: integer
+              minimum: 0
+              maximum: 255
+            description: Массив из одного элемента (яркость 0...255)
+          command:
+            type: integer
+            enum: [2]
+            description: Код команды (2 — установка яркости)
+      examples:
+        - payload:
+            topic: 'matrix/hello'
+            command: 2
+            data: [128]
