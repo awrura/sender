@@ -2,6 +2,7 @@
 ![Static Badge](https://img.shields.io/badge/mqtt-2.0.18-blue?logo=mqtt)
 ![Static Badge](https://img.shields.io/badge/docker-25.0.4-blue?logo=docker)
 ![Static Badge](https://img.shields.io/badge/redis-7.2.4-blue?logo=redis&logoColor=red)
+![Static Badge](https://img.shields.io/badge/uv-0.5.11-blue?logo=uv&logoColor=%23DE5FE9)
 
 ## Сервис отправки
 
